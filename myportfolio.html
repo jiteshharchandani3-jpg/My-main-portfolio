@@ -380,10 +380,10 @@
       content: '';
       position: absolute; inset: 0;
       background: rgba(255,255,255,0.15);
-      transform: scJitesh(0); transform-origin: left;
+      transform: scale(0); transform-origin: left;
       transition: transform var(--transition);
     }
-    .btn-primary:hover::before { transform: scJitesh(1); }
+    .btn-primary:hover::before { transform: scale(1); }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,212,255,0.3); }
 
     .btn-outline {
@@ -1740,7 +1740,8 @@
       submitText.textContent = 'Sending...';
 
       try {
-        const res = await fetch('http://localhost:5000/api/contact', {
+               const res = await fetch('/api/contact', {
+
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1761,10 +1762,9 @@
           throw new Error(data.error || 'Server error');
         }
       } catch (err) {
-        // Fallback: show success if backend not running (demo mode)
-        formStatus.className = 'form-status success';
-        formStatus.textContent = '✓ Message received (demo mode). Backend not running — see server/ folder.';
-        contactForm.reset();
+               formStatus.className = 'form-status error';
+        formStatus.textContent = '⚠ Message could not be sent. Please try again later.';
+
       } finally {
         submitText.textContent = 'Send Message →';
       }
