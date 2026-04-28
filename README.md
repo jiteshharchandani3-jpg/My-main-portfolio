@@ -35,7 +35,7 @@ npx serve .          # or: python -m http.server 3000
 ### 2. Backend Setup
 
 **Prerequisites:**
-- Node.js v18+
+- Node.js v24+
 - MongoDB (local or Atlas)
 
 ```bash
