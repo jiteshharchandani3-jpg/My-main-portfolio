@@ -1,11 +1,11 @@
 {
   "name": "portfolio-backend",
   "version": "1.0.0",
-  "description": "Alex Mercer Portfolio — Express + MongoDB Backend",
-  "main": "index.js",
+  "description": "Jitesh Harchandani Portfolio - Express + MongoDB Backend",
+ "main": "server.local.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node server.local.js",
+    "dev": "nodemon server.local.js",
     "test": "echo \"No tests yet\" && exit 0"
   },
   "dependencies": {
