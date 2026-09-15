@@ -174,19 +174,9 @@
 //     });
 //   }
 // };
-export default {
-  fetch(request) {
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "API is working"
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
-    );
-  }
-};
+export default function handler(req, res) {
+  res.status(200).json({
+    success: true,
+    message: "API is working"
+  });
+}
