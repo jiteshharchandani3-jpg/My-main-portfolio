@@ -205,6 +205,51 @@ Use [MongoDB Atlas](https://cloud.mongodb.com) for free cloud MongoDB. Get your 
 
 ---
 
+---
+
+## ⚡ Connecting to Supabase (Step-by-Step)
+
+This repository supports **Supabase** for zero-backend static hosting (GitHub Pages, Netlify, Vercel) or serverless API integration.
+
+### Step 1: Create a Supabase Project
+1. Go to [supabase.com](https://supabase.com) and click **Start your project**.
+2. Click **New Project** and enter a project name (e.g. `portfolio-db`) and database password.
+3. Wait for your project to initialize (~1 minute).
+
+### Step 2: Set Up Database Table & RLS Policies
+1. In your Supabase Dashboard sidebar, click **SQL Editor**.
+2. Open the file [`supabase/schema.sql`](file:///c:/Users/Jitesh/Desktop/portfolio/supabase/schema.sql) from this repository.
+3. Copy its contents into the SQL Editor query window in Supabase and click **Run**.
+   - This creates the `contact_messages` table.
+   - Enables **Row Level Security (RLS)**.
+   - Grants public anonymous visitors permission to insert form messages while restricting viewing permissions.
+
+### Step 3: Get Your API Keys
+1. In Supabase Dashboard, go to **Project Settings** (gear icon) -> **API**.
+2. Copy your **Project URL** (e.g., `https://xyz.supabase.co`) and **`anon` `public` key**.
+
+### Step 4: Choose Your Integration Mode
+
+#### Option A: Direct Client-Side (Static Site / GitHub Pages)
+1. Open `index.html`.
+2. Locate the `SUPABASE_URL` and `SUPABASE_ANON_KEY` constants near the bottom of the script section:
+   ```js
+   const SUPABASE_URL = "https://your-project-ref.supabase.co";
+   const SUPABASE_ANON_KEY = "your-supabase-anon-key";
+   ```
+3. Paste your URL and Anon Key. Form submissions will now store directly into Supabase database!
+
+#### Option B: Serverless API (`api/contact.js`) / Vercel
+1. Set the following environment variables in `.env.local` or Vercel Settings:
+   ```env
+   SUPABASE_URL=https://your-project-ref.supabase.co
+   SUPABASE_ANON_KEY=your-supabase-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+   ```
+2. Any POST request to `/api/contact` will save to Supabase and optionally trigger email notifications.
+
+---
+
 ## 🔧 Customization Checklist
 
 - [ ] Replace `Jitesh Harchandani` with your name throughout `index.html`

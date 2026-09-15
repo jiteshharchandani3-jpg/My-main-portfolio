@@ -1,49 +1,38 @@
 require('dotenv').config();
 
-const mongoose = require('mongoose');
+const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const validator = require('validator');
 
-let cached = global.mongoose;
+// -----------------------------
+// Supabase
+// -----------------------------
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
+const supabase =
+  supabaseUrl && supabaseKey
+    ? createClient(supabaseUrl, supabaseKey)
+    : null;
 
-async function connectDB() {
-  if (cached.conn) return cached.conn;
-
-  if (!process.env.MONGO_URI) {
-    throw new Error('MONGO_URI is missing');
-  }
-
-  if (!cached.promise) {
-    cached.promise = mongoose.connect(process.env.MONGO_URI).then((mongoose) => mongoose);
-  }
-
-  cached.conn = await cached.promise;
-  return cached.conn;
-}
-
-const contactSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  subject: String,
-  message: String,
-  ipAddress: String,
-  read: { type: Boolean, default: false },
-  timestamp: { type: Date, default: Date.now }
-});
-
-const Contact = mongoose.models.Contact || mongoose.model('Contact', contactSchema);
-
+// -----------------------------
+// Sanitize input
+// -----------------------------
 function sanitize(value) {
   if (typeof value !== 'string') return '';
   return validator.escape(value.trim());
 }
 
-async function sendEmail(contact) {
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.NOTIFY_EMAIL) {
+// -----------------------------
+// Send email notification
+// -----------------------------
+async function sendEmailNotification(contact) {
+  if (
+    !process.env.SMTP_HOST ||
+    !process.env.SMTP_USER ||
+    !process.env.SMTP_PASS ||
+    !process.env.NOTIFY_EMAIL
+  ) {
     return;
   }
 
@@ -63,54 +52,124 @@ async function sendEmail(contact) {
     subject: `[Portfolio] New message from ${contact.name}`,
     html: `
       <h2>New portfolio message</h2>
+
       <p><strong>Name:</strong> ${contact.name}</p>
+
       <p><strong>Email:</strong> ${contact.email}</p>
+
       <p><strong>Subject:</strong> ${contact.subject}</p>
+
       <p><strong>Message:</strong></p>
+
       <p>${contact.message.replace(/\n/g, '<br>')}</p>
     `
   });
 }
 
+// -----------------------------
+// API Handler
+// -----------------------------
 module.exports = async function handler(req, res) {
+  // Only allow POST
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({
+      error: 'Method not allowed'
+    });
   }
 
   try {
-    const { name, email, subject, message } = req.body;
+    // Check Supabase configuration
+    if (!supabase) {
+      console.error('Supabase environment variables are missing.');
 
+      return res.status(500).json({
+        error: 'Server configuration error.'
+      });
+    }
+
+    const {
+      name,
+      email,
+      subject,
+      message
+    } = req.body || {};
+
+    // -----------------------------
+    // Validation
+    // -----------------------------
     if (!name || !email || !message) {
-      return res.status(400).json({ error: 'Name, email, and message are required.' });
+      return res.status(400).json({
+        error: 'Name, email, and message are required.'
+      });
     }
 
     if (!validator.isEmail(email)) {
-      return res.status(400).json({ error: 'Please enter a valid email address.' });
+      return res.status(400).json({
+        error: 'Please enter a valid email address.'
+      });
     }
 
     if (message.trim().length < 10) {
-      return res.status(400).json({ error: 'Message must be at least 10 characters.' });
+      return res.status(400).json({
+        error: 'Message must be at least 10 characters.'
+      });
     }
 
-    await connectDB();
-
-    const contact = await Contact.create({
+    // -----------------------------
+    // Prepare Supabase payload
+    // -----------------------------
+    const payload = {
       name: sanitize(name).slice(0, 80),
-      email: validator.normalizeEmail(email) || email.toLowerCase(),
+      email:
+        validator.normalizeEmail(email) ||
+        email.toLowerCase(),
       subject: sanitize(subject || 'No subject').slice(0, 150),
       message: sanitize(message).slice(0, 2000),
-      ipAddress: req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown'
+      ip_address:
+        req.headers['x-forwarded-for'] ||
+        req.socket?.remoteAddress ||
+        'unknown'
+    };
+
+    // -----------------------------
+    // Save to Supabase
+    // -----------------------------
+    const { data, error } = await supabase
+      .from('contact_messages')
+      .insert([payload])
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error('Supabase Insert Error:', error);
+
+      return res.status(500).json({
+        error: 'Unable to save your message. Please try again later.'
+      });
+    }
+
+    // -----------------------------
+    // Send email notification
+    // -----------------------------
+    sendEmailNotification(payload).catch((emailError) => {
+      console.error('Email Notification Error:', emailError);
     });
 
-    sendEmail(contact).catch(console.error);
-
+    // -----------------------------
+    // Success response
+    // -----------------------------
     return res.status(201).json({
       success: true,
       message: "Message received! I'll get back to you soon.",
-      id: contact._id
+      id: data?.id || null,
+      storage: 'supabase'
     });
+
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Internal server error. Please try again later.' });
+    console.error('Contact Handler Error:', error);
+
+    return res.status(500).json({
+      error: 'Internal server error. Please try again later.'
+    });
   }
 };
