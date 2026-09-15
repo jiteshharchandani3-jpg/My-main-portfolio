@@ -165,11 +165,12 @@ module.exports = async function handler(req, res) {
       storage: 'supabase'
     });
 
-  } catch (error) {
+    } catch (error) {
     console.error('Contact Handler Error:', error);
 
     return res.status(500).json({
-      error: 'Internal server error. Please try again later.'
+      error: error.message || 'Unknown server error',
+      details: error
     });
   }
 };
