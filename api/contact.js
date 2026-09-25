@@ -3,7 +3,7 @@ require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
 
-const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseUrl = "https://buhitvavsivehubtvxso.supabase.co";
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const supabase = createClient(
@@ -65,7 +65,7 @@ module.exports = async function handler(req, res) {
 
     const visitorEmail = await resend.emails.send({
       from: 'Portfolio <onboarding@resend.dev>',
-      to: [cleanEmail],
+      to: ['delivered@resend.dev'],
       subject: 'Thank you for your inquiry',
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
@@ -102,7 +102,7 @@ module.exports = async function handler(req, res) {
 
     const notificationEmail = await resend.emails.send({
       from: 'Portfolio <onboarding@resend.dev>',
-      to: ['jiteshharchandani3@gmail.com'],
+      to: ['delivered@resend.dev'],
       subject: `New Portfolio Inquiry: ${cleanSubject}`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
