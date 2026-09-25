@@ -65,7 +65,7 @@ module.exports = async function handler(req, res) {
 
     const visitorEmail = await resend.emails.send({
       from: 'Portfolio <onboarding@resend.dev>',
-      to: ['delivered@resend.dev'],
+      to: [cleanEmail],
       subject: 'Thank you for your inquiry',
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
@@ -102,7 +102,7 @@ module.exports = async function handler(req, res) {
 
     const notificationEmail = await resend.emails.send({
       from: 'Portfolio <onboarding@resend.dev>',
-      to: ['delivered@resend.dev'],
+      to: ['harchandanijitesh.dev@gmail.com'],
       subject: `New Portfolio Inquiry: ${cleanSubject}`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
