@@ -3,7 +3,7 @@ require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
 
-const supabaseUrl = "https://buhitvavsivehubtvxso.supabase.co";
+const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const supabase = createClient(
