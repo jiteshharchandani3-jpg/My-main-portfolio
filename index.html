@@ -296,21 +296,30 @@
     }
 
     /* Mobile nav */
+    /* Mobile nav - Full Screen */
     .mobile-nav {
       position: fixed;
       top: 64px;
       left: 0;
-      right: 0;
+      width: 100%;
+      height: calc(100dvh - 64px);
+
       background: var(--bg2);
       border-bottom: 1px solid var(--border);
-      padding: 24px 5%;
+
+      padding: 40px 8%;
+
       display: none;
       flex-direction: column;
-      gap: 16px;
+      gap: 24px;
+
       z-index: 999;
+
       transform: translateY(-10px);
       opacity: 0;
       transition: all var(--transition);
+
+      overflow-y: auto;
     }
 
     .mobile-nav.open {
