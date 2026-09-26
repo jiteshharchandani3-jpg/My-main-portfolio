@@ -108,12 +108,77 @@ module.exports = async function handler(req, res) {
     });
 
     // ==========================================
-    // 3. RETURN SUCCESS
+    // 3. SEND NOTIFICATION EMAIL TO JITESH
+    // ==========================================
+
+    await transporter.sendMail({
+      from: `"Portfolio Website" <${process.env.GMAIL_USER}>`,
+      to: process.env.GMAIL_USER,
+      replyTo: cleanEmail,
+      subject: `New Portfolio Inquiry: ${cleanSubject}`,
+      html: `
+        <div style="
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          max-width: 650px;
+          margin: auto;
+          padding: 20px;
+        ">
+          <h2>🔔 New Website Inquiry</h2>
+
+          <p>
+            Someone has submitted an inquiry through your portfolio website.
+          </p>
+
+          <hr>
+
+          <p>
+            <strong>Name:</strong> ${cleanName}
+          </p>
+
+          <p>
+            <strong>Email:</strong> ${cleanEmail}
+          </p>
+
+          <p>
+            <strong>Subject:</strong> ${cleanSubject}
+          </p>
+
+          <p>
+            <strong>Message:</strong>
+          </p>
+
+          <div style="
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+          ">
+            ${cleanMessage}
+          </div>
+
+          <hr>
+
+          <p>
+            You can simply click <strong>Reply</strong> to respond
+            directly to the person who submitted this inquiry.
+          </p>
+
+          <p>
+            <strong>Jitesh Harchandani</strong><br>
+            Portfolio Website
+          </p>
+        </div>
+      `
+    });
+
+    // ==========================================
+    // 4. RETURN SUCCESS
     // ==========================================
 
     return res.status(200).json({
       success: true,
-      message: 'Message saved and confirmation email sent!',
+      message: 'Message saved and both emails sent successfully!',
       data
     });
 
