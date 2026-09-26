@@ -1,9 +1,9 @@
 require('dotenv').config();
 
 const { createClient } = require('@supabase/supabase-js');
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
-const supabaseUrl = "https://buhitvavsivehubtvxso.supabase.co";
+const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const supabase = createClient(
@@ -11,7 +11,14 @@ const supabase = createClient(
   supabaseKey
 );
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Gmail SMTP
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD
+  }
+});
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -63,12 +70,18 @@ module.exports = async function handler(req, res) {
     // 2. SEND THANK-YOU EMAIL TO VISITOR
     // ==========================================
 
-    const visitorEmail = await resend.emails.send({
-      from: 'Portfolio <onboarding@resend.dev>',
-      to: [cleanEmail],
+    await transporter.sendMail({
+      from: `"Jitesh Harchandani" <${process.env.GMAIL_USER}>`,
+      to: cleanEmail,
       subject: 'Thank you for your inquiry',
       html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <div style="
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          max-width: 600px;
+          margin: auto;
+          padding: 20px;
+        ">
           <h2>Thank you, ${cleanName}!</h2>
 
           <p>
@@ -78,7 +91,9 @@ module.exports = async function handler(req, res) {
 
           <hr>
 
-          <p><strong>Subject:</strong> ${cleanSubject}</p>
+          <p>
+            <strong>Subject:</strong> ${cleanSubject}
+          </p>
 
           <p>
             Thank you for reaching out through my portfolio website.
@@ -92,61 +107,13 @@ module.exports = async function handler(req, res) {
       `
     });
 
-    if (visitorEmail.error) {
-      console.error('Visitor Email Error:', visitorEmail.error);
-    }
-
     // ==========================================
-    // 3. SEND NOTIFICATION EMAIL TO YOU
-    // ==========================================
-
-    const notificationEmail = await resend.emails.send({
-      from: 'Portfolio <onboarding@resend.dev>',
-      to: ['harchandanijitesh.dev@gmail.com'],
-      subject: `New Portfolio Inquiry: ${cleanSubject}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-          <h2>New Portfolio Inquiry</h2>
-
-          <p><strong>Name:</strong> ${cleanName}</p>
-
-          <p><strong>Email:</strong> ${cleanEmail}</p>
-
-          <p><strong>Subject:</strong> ${cleanSubject}</p>
-
-          <p><strong>Message:</strong></p>
-
-          <div style="
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 8px;
-          ">
-            ${cleanMessage}
-          </div>
-
-          <hr>
-
-          <p>
-            This message was submitted through your portfolio website.
-          </p>
-        </div>
-      `
-    });
-
-    if (notificationEmail.error) {
-      console.error(
-        'Notification Email Error:',
-        notificationEmail.error
-      );
-    }
-
-    // ==========================================
-    // 4. RETURN SUCCESS
+    // 3. RETURN SUCCESS
     // ==========================================
 
     return res.status(200).json({
       success: true,
-      message: 'Message saved and emails processed successfully!',
+      message: 'Message saved and confirmation email sent!',
       data
     });
 
