@@ -480,11 +480,12 @@
 
     .hero-name {
       font-family: var(--font-display);
-      font-size: clamp(2.8rem, 6vw, 5.5rem);
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
       font-weight: 800;
-      line-height: 1.0;
-      letter-spacing: -3px;
+      line-height: 1;
+      letter-spacing: -2.5px;
       margin-bottom: 16px;
+      max-width: 100%;
     }
 
     .hero-name .line1 {
@@ -495,6 +496,8 @@
       display: block;
       color: transparent;
       -webkit-text-stroke: 1.5px var(--text);
+      font-size: 0.75em;
+      white-space: nowrap;
     }
 
     [data-theme="light"] .hero-name .line2 {
@@ -1483,7 +1486,7 @@
           </div>
           <h1 class="hero-name">
             <span class="line1">Jitesh</span>
-            <span class="line2">H</span>
+            <span class="line2">Harchandani</span>
 
           </h1>
           <p class="hero-title">
